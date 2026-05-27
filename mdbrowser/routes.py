@@ -13,8 +13,16 @@ browser_bp = Blueprint(
     static_folder='static'
 )
 
-# Reference dynamic paths from the parent backup module
+# Reference parent backup module
 import backup
+
+def get_markdown_dir():
+    """Dynamically resolve the markdown directory from config at request time to prevent caching/desync issues."""
+    return Path(backup.load_config()) / "markdown"
+
+def get_resources_dir():
+    """Dynamically resolve the resources directory from config at request time."""
+    return get_markdown_dir() / "_resources"
 
 def get_file_meta_info(filepath, keep_version=None):
     """Retrieve formatted file size and modification date metadata."""
@@ -126,7 +134,7 @@ def cleaner():
 @browser_bp.route('/api/notebooks')
 def get_notebooks():
     """Get list of notebooks (folders) with their respective note count."""
-    markdown_dir = backup.MARKDOWN_DIR
+    markdown_dir = get_markdown_dir()
     if not markdown_dir.exists():
         return jsonify([])
         
@@ -145,7 +153,7 @@ def get_notebooks():
 @browser_bp.route('/api/notes/<notebook_name>')
 def get_notes_in_notebook(notebook_name):
     """Get lists of note metadata for a given notebook."""
-    notebook_path = backup.MARKDOWN_DIR / notebook_name
+    notebook_path = get_markdown_dir() / notebook_name
     if not notebook_path.exists() or not notebook_path.is_dir():
         return jsonify([]), 404
         
@@ -159,7 +167,7 @@ def get_notes_in_notebook(notebook_name):
 @browser_bp.route('/api/notes/<notebook_name>/<filename>/raw')
 def get_raw_note_content(notebook_name, filename):
     """Retrieve the raw markdown content of a specific note."""
-    note_path = backup.MARKDOWN_DIR / notebook_name / filename
+    note_path = get_markdown_dir() / notebook_name / filename
     if not note_path.exists():
         return jsonify({"error": "Note not found"}), 404
         
@@ -173,7 +181,7 @@ def get_raw_note_content(notebook_name, filename):
 @browser_bp.route('/api/resources/<path:filename>')
 def get_resource(filename):
     """Serve attachment files (images, PDFs) from the resources directory."""
-    resources_dir = backup.RESOURCES_DIR
+    resources_dir = get_resources_dir()
     if not resources_dir.exists():
         return jsonify({"error": "Resources directory does not exist"}), 404
     return send_from_directory(resources_dir, filename)
@@ -181,7 +189,7 @@ def get_resource(filename):
 @browser_bp.route('/api/tags')
 def get_all_tags():
     """Aggregate all tags across all notes in the backup database."""
-    markdown_dir = backup.MARKDOWN_DIR
+    markdown_dir = get_markdown_dir()
     if not markdown_dir.exists():
         return jsonify({})
         
@@ -207,7 +215,7 @@ def search_notes():
         return jsonify([])
         
     results = []
-    markdown_dir = backup.MARKDOWN_DIR
+    markdown_dir = get_markdown_dir()
     if not markdown_dir.exists():
         return jsonify([])
         
@@ -242,7 +250,7 @@ def search_notes():
 @browser_bp.route('/api/cleaner/scan/<notebook_name>')
 def scan_duplicates(notebook_name):
     """Scan notebook for duplicate notes and group them into keep vs delete lists."""
-    notebook_path = backup.MARKDOWN_DIR / notebook_name
+    notebook_path = get_markdown_dir() / notebook_name
     if not notebook_path.exists() or not notebook_path.is_dir():
         return jsonify({"keep": [], "delete": []}), 404
 
@@ -313,7 +321,7 @@ def delete_duplicates():
     if ".." in notebook or "/" in notebook or "\\" in notebook:
         return jsonify({"status": "error", "errors": ["Invalid notebook path"]}), 400
         
-    notebook_path = backup.MARKDOWN_DIR / notebook
+    notebook_path = get_markdown_dir() / notebook
     if not notebook_path.exists() or not notebook_path.is_dir():
         return jsonify({"status": "error", "errors": ["Notebook directory not found"]}), 400
         
@@ -370,7 +378,7 @@ def delete_single_note():
     if not filename.endswith(".md"):
         return jsonify({"status": "error", "error": "Security block: only markdown files are permitted"}), 400
         
-    notebook_path = backup.MARKDOWN_DIR / notebook
+    notebook_path = get_markdown_dir() / notebook
     if not notebook_path.exists() or not notebook_path.is_dir():
         return jsonify({"status": "error", "error": "Notebook directory not found"}), 400
         
