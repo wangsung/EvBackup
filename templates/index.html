@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evernote BackupManager Dashboard</title>
+    <!-- Linking Shared Premium Stylesheet -->
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+    <div class="container">
+        <!-- Dashboard Header -->
+        <header>
+            <div class="logo-group">
+                <div class="logo-icon">🔄</div>
+                <div class="logo-text">
+                    <h1>BackupManager</h1>
+                    <p>Evernote Local Archive Exporter</p>
+                </div>
+            </div>
+            <div class="badge success pulse-glow" id="server-status">
+                대시보드 서버 작동 중
+            </div>
+        </header>
+
+        <!-- Config Section -->
+        <div class="config-panel" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px;">
+                <span class="config-title-icon" style="font-size: 18px; line-height: 1;">📂</span>
+                <span class="config-title" style="font-weight: 600; font-size: 14px; white-space: nowrap; color: var(--text-primary);">로컬 백업 저장소 :</span>
+                <code id="backup-dir-display" style="font-family: 'Fira Code', monospace; font-size: 13px; color: hsl(var(--accent-cyan)); font-weight: bold; background: rgba(0, 240, 255, 0.05); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.15); word-break: break-all; flex: 1;">
+                    불러오는 중...
+                </code>
+            </div>
+            <button class="btn btn-primary btn-save" id="btn-browse-config" onclick="browseAndSaveConfig()" style="box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2); background: linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--accent-purple))); border: none; font-weight: 700; height: 38px; padding: 0 16px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; margin: 0; white-space: nowrap;">
+                📂 경로 변경
+            </button>
+        </div>
+
+        <!-- Row 1: Diagnostics Cards -->
+        <div class="status-grid">
+            <!-- 1. Dependencies Card -->
+            <div class="card cyan" id="card-dependencies">
+                <div class="card-title-group">
+                    <span class="card-title">1단계: 실행 라이브러리</span>
+                    <span class="card-icon">📦</span>
+                </div>
+                <div class="card-value" id="dep-badge-container">
+                    <span class="badge warning">검사 중...</span>
+                </div>
+                <div class="card-subtext">파이썬 의존성 패키지 상태</div>
+                <div class="card-list" id="dep-list">
+                    <!-- Dynamic dependencies list -->
+                </div>
+                <div class="card-action-container">
+                    <button class="btn btn-secondary card-btn" id="btn-init" onclick="runTask('init')">
+                        🔑 로그인 인증 받기
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. OAuth Authentication Card -->
+            <div class="card purple" id="card-auth">
+                <div class="card-title-group">
+                    <span class="card-title">2단계: 에버노트 로그인</span>
+                    <span class="card-icon">🔑</span>
+                </div>
+                <div class="card-value" id="auth-badge-container">
+                    <span class="badge warning">검사 중...</span>
+                </div>
+                <div class="card-subtext" id="auth-db-path">로컬 인증 정보 (token_bk.db)</div>
+                <div class="card-list" id="auth-list">
+                    <!-- Dynamic auth details -->
+                </div>
+                <div class="card-action-container">
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <button class="btn btn-primary card-btn" id="btn-all" onclick="runTask('all')" style="flex: 1.2;">🚀 원클릭 전체백업</button>
+                        <button class="btn btn-success card-btn" id="btn-sync" onclick="runTask('sync')" style="flex: 0.8;">🔄 증분 동기화</button>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary card-btn" id="btn-export" onclick="runTask('export')" style="flex: 1;">📁 ENEX 파일 추출</button>
+                        <button class="btn btn-secondary card-btn" id="btn-convert" onclick="runTask('convert')" style="flex: 1;">📝 마크다운 변환</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Backup Status Card -->
+            <div class="card green" id="card-backup">
+                <div class="card-title-group">
+                    <span class="card-title">3단계: 백업 Notes</span>
+                    <span class="card-icon">🗄️</span>
+                </div>
+                <div class="card-value" id="backup-total-notes">0 Notes</div>
+                <div class="card-subtext" id="backup-db-path">로컬 백업 데이터 (note.db)</div>
+                <div class="card-list" id="backup-list">
+                    <!-- Dynamic backup info -->
+                </div>
+                <div class="card-action-container" style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary card-btn" onclick="openLocalFolder()" style="flex: 1;">📁 로컬 백업 폴더</button>
+                    <button class="btn btn-primary card-btn" id="btn-launch-browser" onclick="launchMDBrowser()" style="flex: 1; box-shadow: 0 4px 12px rgba(0, 240, 255, 0.2); background: linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--accent-purple))); border: none; font-weight: 600;">💻 MD브라우저실행</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Row 2: Live Terminal Console Logs -->
+        <div class="terminal-panel" style="margin-top: 10px; margin-bottom: 30px;">
+            <div class="terminal-header">
+                <div class="terminal-controls">
+                    <span class="terminal-dot red"></span>
+                    <span class="terminal-dot yellow"></span>
+                    <span class="terminal-dot green"></span>
+                </div>
+                <div class="terminal-title">
+                    <span id="terminal-loader" class="spinner" style="display: none; margin-right: 8px;"></span>
+                    <span>bash - live_backup_stream.sh</span>
+                </div>
+            </div>
+            <div class="terminal-body" id="terminal-log">
+                <div class="log-line command">[*] 대시보드가 준비되었습니다. 진단 정보를 불러옵니다...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container"></div>
+
+    <!-- JS Logic -->
+    <script>
+        let eventSource = null;
+        let currentRunningAction = null;
+        const allButtons = ['btn-all', 'btn-init', 'btn-sync', 'btn-export', 'btn-convert'];
+
+        // On document load, fetch current diagnostics and backup folder configuration
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchConfig();
+            fetchStatus();
+        });
+
+        // Function to fetch base backup path configuration
+        function fetchConfig() {
+            fetch('/api/config')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('backup-dir-display').innerText = data.base_backup_dir;
+                })
+                .catch(() => showToast("백업 폴더 설정을 불러오지 못했습니다.", "danger"));
+        }
+
+        // Function to trigger native folder picker and then save it
+        function browseAndSaveConfig() {
+            const btn = document.getElementById('btn-browse-config');
+            btn.disabled = true;
+            btn.innerHTML = `⏳ 폴더 선택 중...`;
+            
+            fetch('/api/browse_folder', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.selected_path) {
+                        saveConfig(data.selected_path);
+                    } else if (data.error) {
+                        showToast(data.error, "warning");
+                    }
+                })
+                .catch(() => showToast("폴더 선택창을 여는 도중 에러가 발생했습니다.", "danger"))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `📂 경로 변경`;
+                });
+        }
+
+        // Function to save base backup path configuration
+        function saveConfig(selectedPath) {
+            fetch('/api/config', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ base_backup_dir: selectedPath })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, "success");
+                    document.getElementById('backup-dir-display').innerText = data.base_backup_dir;
+                    // Re-fetch status cards instantly to show updated database states
+                    fetchStatus();
+                } else {
+                    showToast(data.error, "danger");
+                }
+            })
+            .catch(() => showToast("설정 저장 중 오류가 발생했습니다.", "danger"));
+        }
+
+        // Function to fetch status cards dynamically
+        function fetchStatus() {
+            fetch('/api/status')
+                .then(response => response.json())
+                .then(data => {
+                    updateDependenciesCard(data.dependencies);
+                    updateAuthCard(data.database);
+                    updateBackupCard(data.database, data.exports, data.markdown);
+                    
+                    if (data.active) {
+                        disableAllControls(data.active_action);
+                        listenToLogsStream();
+                    } else {
+                        enableAllControls();
+                    }
+                })
+                .catch(err => {
+                    showToast("대시보드 진단 정보를 갱신하지 못했습니다.", "danger");
+                });
+        }
+
+        // 1. Dependency Card UI Update
+        function updateDependenciesCard(depData) {
+            const container = document.getElementById("dep-badge-container");
+            const list = document.getElementById("dep-list");
+            
+            if (depData.ok) {
+                container.innerHTML = `<span class="badge success">준비 완료 (All OK)</span>`;
+            } else {
+                container.innerHTML = `<span class="badge danger">일부 누락 (Missing)</span>`;
+            }
+            
+            list.innerHTML = "";
+            for (const [pkg, installed] of Object.entries(depData.packages)) {
+                const statusIcon = installed ? "🟢" : "🔴";
+                const statusText = installed ? "설치됨" : "누락됨";
+                list.innerHTML += `
+                    <div class="card-list-item">
+                        <span>${statusIcon} ${pkg}</span>
+                        <span class="card-subtext">${statusText}</span>
+                    </div>
+                `;
+            }
+        }
+
+        // 2. OAuth Card UI Update
+        function updateAuthCard(dbData) {
+            const container = document.getElementById("auth-badge-container");
+            const list = document.getElementById("auth-list");
+            
+            if (dbData.token_ok) {
+                container.innerHTML = `<span class="badge success">🔑 인증 토큰 유효</span>`;
+            } else {
+                container.innerHTML = `<span class="badge danger">🔒 인증 필요 (OAuth)</span>`;
+            }
+            
+            list.innerHTML = `
+                <div class="card-list-item">
+                    <span>파일 생성 상태</span>
+                    <span>${dbData.token_exists ? "🟢 존재함" : "🔴 없음"}</span>
+                </div>
+            `;
+            if (dbData.token_exists) {
+                list.innerHTML += `
+                    <div class="card-list-item">
+                        <span>파일 크기</span>
+                        <span>${dbData.token_size_mb.toFixed(2)} MB</span>
+                    </div>
+                `;
+            }
+        }
+
+        // 3. Backup Card UI Update
+        function updateBackupCard(dbData, expData, mdData) {
+            const totalNotes = document.getElementById("backup-total-notes");
+            const list = document.getElementById("backup-list");
+            
+            totalNotes.innerText = `${dbData.notes_count} Notes`;
+            
+            list.innerHTML = `
+                <div class="card-list-item">
+                    <span>동기화 데이터베이스</span>
+                    <span>${dbData.note_exists ? "🟢 note.db 준비됨" : "🔴 없음"}</span>
+                </div>
+            `;
+            if (dbData.note_exists) {
+                list.innerHTML += `
+                    <div class="card-list-item">
+                        <span>노트북 갯수</span>
+                        <span>${dbData.notebooks_count} 개</span>
+                    </div>
+                `;
+                list.innerHTML += `
+                    <div class="card-list-item">
+                        <span>데이터베이스 크기</span>
+                        <span>${dbData.note_size_mb.toFixed(2)} MB</span>
+                    </div>
+                `;
+            }
+            list.innerHTML += `
+                <div class="card-list-item">
+                    <span>ENEX 내보내기 파일</span>
+                    <span>${expData.count} 개</span>
+                </div>
+                <div class="card-list-item">
+                    <span>변환된 마크다운 노트</span>
+                    <span>${mdData.notes} 개 (노트북 ${mdData.notebooks}개)</span>
+                </div>
+            `;
+        }
+
+        let statusInterval = null;
+
+        function runTask(action) {
+            currentRunningAction = action;
+            disableAllControls(action);
+            
+            const logBox = document.getElementById("terminal-log");
+            logBox.innerHTML = `<div class="log-line command">[*] Running task: python backup.py ${action}...</div>`;
+            document.getElementById("terminal-loader").style.display = "inline-block";
+            
+            if (action === "init") {
+                showAuthModal();
+            }
+            
+            fetch('/api/run', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: action })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, "success");
+                    listenToLogsStream();
+                    
+                    if (action === "init") {
+                        startPollingToken();
+                    }
+                } else {
+                    showToast(data.error, "danger");
+                    enableAllControls();
+                    document.getElementById("terminal-loader").style.display = "none";
+                    if (action === "init") {
+                        closeAuthModal();
+                    }
+                }
+            })
+            .catch(err => {
+                showToast("작업 요청 중 에러가 발생했습니다.", "danger");
+                enableAllControls();
+                document.getElementById("terminal-loader").style.display = "none";
+                if (action === "init") {
+                    closeAuthModal();
+                }
+            });
+        }
+
+        function showAuthModal() {
+            document.getElementById("auth-modal").style.display = "flex";
+            document.getElementById("modal-waiting-status").style.display = "flex";
+            document.getElementById("modal-success-status").style.display = "none";
+            document.querySelector(".step-list").style.display = "flex";
+            document.querySelector(".modal-intro").style.display = "block";
+        }
+
+        function startPollingToken() {
+            if (statusInterval) clearInterval(statusInterval);
+            
+            statusInterval = setInterval(() => {
+                fetch('/api/status')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.database.token_ok) {
+                            clearInterval(statusInterval);
+                            document.getElementById("modal-waiting-status").style.display = "none";
+                            document.querySelector(".step-list").style.display = "none";
+                            document.querySelector(".modal-intro").style.display = "none";
+                            document.getElementById("modal-success-status").style.display = "block";
+                            updateDependenciesCard(data.dependencies);
+                            updateAuthCard(data.database);
+                            updateBackupCard(data.database, data.exports, data.markdown);
+                        }
+                    });
+            }, 1000);
+        }
+
+        function closeAuthModal() {
+            document.getElementById("auth-modal").style.display = "none";
+            if (statusInterval) clearInterval(statusInterval);
+            finishExecution();
+        }
+
+        function listenToLogsStream() {
+            if (eventSource) { eventSource.close(); }
+            const logBox = document.getElementById("terminal-log");
+            document.getElementById("terminal-loader").style.display = "inline-block";
+            eventSource = new EventSource('/api/stream');
+            eventSource.onmessage = function(event) {
+                const line = event.data;
+                if (line === ":keep-alive") return;
+                let lineClass = "";
+                if (line.startsWith("[START]")) lineClass = "start";
+                else if (line.startsWith("[SUCCESS]")) {
+                    lineClass = "success";
+                    showToast("백업 작업이 성공적으로 완수되었습니다!", "success");
+                    if (currentRunningAction !== "init") finishExecution();
+                } else if (line.startsWith("[ERROR]")) {
+                    lineClass = "error";
+                    showToast("백업 작업 중 오류가 발생했습니다.", "danger");
+                    finishExecution();
+                } else if (line.startsWith("[*]")) lineClass = "command";
+                else if (line.startsWith("[!]")) lineClass = "warning";
+                
+                logBox.innerHTML += `<div class="log-line ${lineClass}">${escapeHtml(line)}</div>`;
+                logBox.scrollTop = logBox.scrollHeight;
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            };
+            eventSource.onerror = function() { eventSource.close(); };
+        }
+
+        function escapeHtml(text) {
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function finishExecution() {
+            if (eventSource) eventSource.close();
+            document.getElementById("terminal-loader").style.display = "none";
+            fetchStatus();
+        }
+
+        function disableAllControls(activeAction) {
+            allButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = true;
+            });
+            const activeBtn = document.getElementById(`btn-${activeAction}`);
+            if (activeBtn) activeBtn.innerText = `⏳ 작업 실행 중...`;
+        }
+
+        function enableAllControls() {
+            allButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.disabled = false;
+            });
+            const btnAll = document.getElementById('btn-all');
+            if (btnAll) btnAll.innerText = `🚀 원클릭 전체백업`;
+            const btnInit = document.getElementById('btn-init');
+            if (btnInit) btnInit.innerText = `🔑 로그인 인증 받기`;
+            const btnSync = document.getElementById('btn-sync');
+            if (btnSync) btnSync.innerText = `🔄 증분 동기화`;
+            const btnExport = document.getElementById('btn-export');
+            if (btnExport) btnExport.innerText = `📁 ENEX 파일 추출`;
+            const btnConvert = document.getElementById('btn-convert');
+            if (btnConvert) btnConvert.innerText = `📝 마크다운 변환`;
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById("toast-container");
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            const icon = type === "success" ? "✅" : "⚠️";
+            toast.innerHTML = `<span class="toast-icon">${icon}</span><span class="toast-message">${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = "fadeOut 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards";
+                setTimeout(() => { container.removeChild(toast); }, 300);
+            }, 4500);
+        }
+
+        function openLocalFolder() {
+            fetch('/api/open_explorer', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) showToast(data.message, "success");
+                    else showToast(data.error, "danger");
+                })
+                .catch(() => showToast("폴더 열기 요청 중 오류가 발생했습니다.", "danger"));
+        }
+
+        function launchMDBrowser() {
+            const btn = document.getElementById("btn-launch-browser");
+            btn.disabled = true;
+            btn.innerText = "⏳ 실행 중...";
+            fetch('/api/launch_browser', { method: 'POST' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, "success");
+                    } else if (data.status === "inactive") {
+                        showMDBrowserModal();
+                    } else {
+                        showToast(data.error || data.message, "danger");
+                    }
+                })
+                .catch(() => showToast("MD 브라우저 실행 중 오류가 발생했습니다.", "danger"))
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.innerText = "💻 MD브라우저실행";
+                });
+        }
+
+        function showMDBrowserModal() {
+            document.getElementById("mdbrowser-modal").style.display = "flex";
+        }
+
+        function closeMDBrowserModal() {
+            document.getElementById("mdbrowser-modal").style.display = "none";
+        }
+    </script>
+
+    <!-- 🔑 Evernote OAuth Guide Modal Popup -->
+    <div id="auth-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>🔑 에버노트 로그인 및 인증 안내</h3>
+            <p class="modal-intro">새로 열린 검은색 커맨드(CMD) 창과 웹 브라우저를 통해 인증을 완료해 주십시오.</p>
+            
+            <div class="step-list">
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <span class="step-text">새 창으로 열린 브라우저 혹은 <strong>CMD 창에 출력된 URL 링크</strong>를 복제하여 새 창 주소창에 넣고 실행합니다.</span>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">2</span>
+                    <span class="step-text">이동한 Evernote 'Re-authorize Bulk Backup' 화면에서 <strong>[Re-authorize]</strong> 버튼을 선택합니다.</span>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">3</span>
+                    <span class="step-text">브라우저 창에 'Authentication successful!'이 뜨면 성공입니다. <strong>브라우저 창을 닫아줍니다.</strong></span>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">4</span>
+                    <span class="step-text">로그인 완료 후 화면 뒤에 있는 <strong>CMD 커맨드 창을 닫아줍니다</strong>. (아무 키나 누르기)</span>
+                </div>
+            </div>
+
+            <div id="modal-waiting-status" class="waiting-status">
+                <span class="spinner" style="margin-right: 8px;"></span>
+                <span id="waiting-status-text">로컬 인증 파일(token_bk.db)이 생성될 때까지 대기하고 있습니다...</span>
+            </div>
+
+            <div id="modal-success-status" class="success-status" style="display: none;">
+                <div class="success-icon">🎉</div>
+                <h4>로그인 인증 완료!</h4>
+                <p>로컬 인증 데이터베이스(`token_bk.db`)가 정상적으로 생성되었습니다.</p>
+                <div class="next-step-guide">
+                    💡 <strong>다음 단계 안내:</strong><br>
+                    인증이 완료되었습니다! 이제 대시보드로 돌아가 <strong>[🚀 원클릭 전체백업]</strong> 또는 <strong>[🔄 증분 동기화]</strong> 버튼을 선택하여 에버노트 메모 다운로드와 마크다운 변환을 진행하세요.
+                </div>
+                <button class="btn btn-primary" id="btn-modal-close" onclick="closeAuthModal()">확인 (OK)</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💻 MDBrowser Server Guide Modal Popup -->
+    <div id="mdbrowser-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>💻 MD 브라우저 서버 구동 안내</h3>
+            <p class="modal-intro">Evernote 마크다운 백업 뷰어(MDBrowser) 서버가 구동 중이 아닙니다. 아래의 순서에 따라 서버를 기동해 주시기 바랍니다.</p>
+            
+            <div class="step-list">
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <span class="step-text">윈도우 파일 탐색기를 실행하고 <strong><code>C:\_My2026\_EVERBK\_MDBrower</code></strong> 폴더로 이동합니다.</span>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">2</span>
+                    <span class="step-text">폴더 내의 <strong><code>server.py</code></strong> 파일을 파이썬으로 실행하기 위해 CMD 커맨드 창을 열고 아래의 명령어를 입력해 기동합니다.<br>
+                    <code style="font-family: 'Fira Code', monospace; font-size: 12px; color: hsl(var(--accent-cyan)); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">python server.py</code>
+                    </span>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">3</span>
+                    <span class="step-text">만약 윈도우 원클릭 배치 파일이 존재하는 경우, <strong>배치 파일(예: run.bat 또는 server.bat 등)을 마우스 더블클릭</strong>하여 간편하게 구동하실 수도 있습니다.</span>
+                </div>
+                <div class="step-item">
+                    <span class="step-number">4</span>
+                    <span class="step-text">구동 로그 <code>* Running on http://127.0.0.1:5000</code>가 확인되면 서버 작동 성공입니다. 뷰어로 진입하려면 대시보드로 돌아와 다시 **`[💻 MD브라우저실행]`**을 선택해 주십시오.</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="btn-mdbrowser-modal-close" onclick="closeMDBrowserModal()" style="width: 100%; margin-top: 10px;">확인 (OK)</button>
+        </div>
+    </div>
+</body>
+</html>

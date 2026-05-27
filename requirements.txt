@@ -1,0 +1,4 @@
+evernote-backup
+beautifulsoup4
+markdownify
+flask

@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Environments
+.venv/
+venv/
+ENV/
+env/
+_cli/
+
+# Local configurations (contains local paths)
+config.json
