@@ -5,7 +5,7 @@ import datetime
 from pathlib import Path
 from flask import Blueprint, jsonify, request, send_from_directory, render_template
 
-# Define Blueprint
+# Define Blueprint pointing to its own nested folders relative to the module package
 browser_bp = Blueprint(
     'browser', 
     __name__,
@@ -13,7 +13,7 @@ browser_bp = Blueprint(
     static_folder='static'
 )
 
-# Reference dynamic paths from the backup module
+# Reference dynamic paths from the parent backup module
 import backup
 
 def get_file_meta_info(filepath, keep_version=None):
@@ -251,13 +251,12 @@ def scan_duplicates(notebook_name):
     groups = {}
     for fp in all_files:
         filename = fp.name
-        stem = fp.stem
-        match = re.match(r'^(.*?)(_\d+)$', stem)
+        match = re.match(r'^(.*?)(_\d+)$', fp.stem)
         if match:
             base_name = match.group(1)
             suffix = match.group(2)
         else:
-            base_name = stem
+            base_name = fp.stem
             suffix = ""
             
         if base_name not in groups:

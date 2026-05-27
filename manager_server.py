@@ -16,7 +16,7 @@ from backup import check_dependencies, check_database, check_exports, check_mark
 app = Flask(__name__)
 
 # Register MDBrowser Blueprint
-from browser_routes import browser_bp
+from mdbrowser.routes import browser_bp
 app.register_blueprint(browser_bp, url_prefix='/browser')
 
 # Global thread-safe process runner

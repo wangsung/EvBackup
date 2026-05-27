@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Shared Premium Vanilla CSS Stylesheet -->
-    <link rel="stylesheet" href="/static/browser_style.css">
+    <!-- Shared Premium Blueprint Stylesheet -->
+    <link rel="stylesheet" href="/browser/static/style.css">
 </head>
 <body class="cleaner-layout">
 
@@ -128,7 +128,6 @@
         async function selectDirectory(name) {
             currentNotebook = name;
             
-            // Update Active highlights
             document.querySelectorAll(".dir-item").forEach(item => item.classList.remove("active"));
             const target = document.getElementById(`dir-${name}`);
             if (target) target.classList.add("active");

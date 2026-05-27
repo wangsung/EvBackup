@@ -137,14 +137,9 @@
             fetchStatus();
         });
 
-        // Function to update dynamic paths in display and modal
+        // Function to update dynamic paths in display
         function updateBackupDirDisplay(path) {
             document.getElementById('backup-dir-display').innerText = path;
-            const normalizedPath = path.replace(/\//g, '\\');
-            const mdbrowserCode = document.getElementById('mdbrowser-folder-path');
-            if (mdbrowserCode) {
-                mdbrowserCode.innerText = normalizedPath + '\\_MDBrower';
-            }
         }
 
         // Function to fetch base backup path configuration
