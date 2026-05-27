@@ -19,6 +19,27 @@ app = Flask(__name__)
 from mdbrowser.routes import browser_bp
 app.register_blueprint(browser_bp, url_prefix='/browser')
 
+# Register Jinja2 Translation Context Processor
+def load_translations(lang):
+    filepath = os.path.join(os.path.dirname(__file__), 'i18n', f'{lang}.json')
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        fallback_path = os.path.join(os.path.dirname(__file__), 'i18n', 'ko.json')
+        try:
+            with open(fallback_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            return {}
+
+@app.context_processor
+def inject_translations():
+    lang = request.cookies.get('lang') or request.accept_languages.best_match(['ko', 'en']) or 'ko'
+    if lang not in ['ko', 'en']:
+        lang = 'ko'
+    return dict(t=load_translations(lang), current_lang=lang)
+
 # Global thread-safe process runner
 class ProcessRunner:
     def __init__(self):
@@ -159,6 +180,16 @@ def api_browse_folder():
     import sys
     import backup
     
+    # Retrieve language from cookies or browser headers
+    lang = request.cookies.get('lang') or request.accept_languages.best_match(['ko', 'en']) or 'ko'
+    if lang not in ['ko', 'en']:
+        lang = 'ko'
+        
+    dialog_title = "Select Backup Storage Folder" if lang == 'en' else "백업 저장소 폴더 선택"
+    cancel_msg = "Directory selection cancelled." if lang == 'en' else "폴더 선택이 취소되었습니다."
+    timeout_msg = "Directory selection timed out." if lang == 'en' else "폴더 선택 대기 시간이 초과되었습니다."
+    error_msg_prefix = "Failed to open folder picker: " if lang == 'en' else "폴더 선택 창 열기 실패: "
+    
     initial_dir = str(backup.BASE_BACKUP_DIR).replace("\\", "/")
     script = f"""
 import tkinter as tk
@@ -166,7 +197,7 @@ from tkinter import filedialog
 root = tk.Tk()
 root.withdraw()
 root.attributes('-topmost', True)
-selected = filedialog.askdirectory(initialdir='{initial_dir}', title='백업 저장소 폴더 선택')
+selected = filedialog.askdirectory(initialdir='{initial_dir}', title='{dialog_title}')
 print(selected)
 """
     try:
@@ -180,11 +211,11 @@ print(selected)
         if selected_path:
             return jsonify({"success": True, "selected_path": selected_path})
         else:
-            return jsonify({"success": False, "error": "폴더 선택이 취소되었습니다."})
+            return jsonify({"success": False, "error": cancel_msg})
     except subprocess.TimeoutExpired:
-        return jsonify({"success": False, "error": "폴더 선택 대기 시간이 초과되었습니다."}), 408
+        return jsonify({"success": False, "error": timeout_msg}), 408
     except Exception as e:
-        return jsonify({"success": False, "error": f"폴더 선택 창 열기 실패: {str(e)}"}), 500
+        return jsonify({"success": False, "error": f"{error_msg_prefix}{str(e)}"}), 500
 
 @app.route('/api/status')
 def api_status():

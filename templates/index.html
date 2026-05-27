@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{ current_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evernote BackupManager Dashboard</title>
+    <title>{{ t.dashboard.title }}</title>
     <!-- Linking Shared Premium Stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
 </head>
@@ -19,8 +19,14 @@
                     <p>Evernote Local Archive Exporter</p>
                 </div>
             </div>
-            <div class="badge success pulse-glow" id="server-status">
-                대시보드 서버 작동 중
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="lang-selector" style="display: flex; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 2px;">
+                    <button onclick="setLang('ko')" style="background: {{ 'rgba(255, 255, 255, 0.15)' if current_lang == 'ko' else 'none' }}; border: none; color: {{ 'white' if current_lang == 'ko' else 'rgba(255,255,255,0.6)' }}; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.2s;">KO</button>
+                    <button onclick="setLang('en')" style="background: {{ 'rgba(255, 255, 255, 0.15)' if current_lang == 'en' else 'none' }}; border: none; color: {{ 'white' if current_lang == 'en' else 'rgba(255,255,255,0.6)' }}; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.2s;">EN</button>
+                </div>
+                <div class="badge success pulse-glow" id="server-status">
+                    {{ t.dashboard.server_running }}
+                </div>
             </div>
         </header>
 
@@ -28,13 +34,13 @@
         <div class="config-panel" style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 280px;">
                 <span class="config-title-icon" style="font-size: 18px; line-height: 1;">📂</span>
-                <span class="config-title" style="font-weight: 600; font-size: 14px; white-space: nowrap; color: var(--text-primary);">로컬 백업 저장소 :</span>
+                <span class="config-title" style="font-weight: 600; font-size: 14px; white-space: nowrap; color: var(--text-primary);">{{ t.dashboard.local_backup_store }} :</span>
                 <code id="backup-dir-display" style="font-family: 'Fira Code', monospace; font-size: 13px; color: hsl(var(--accent-cyan)); font-weight: bold; background: rgba(0, 240, 255, 0.05); padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.15); word-break: break-all; flex: 1;">
-                    불러오는 중...
+                    {{ t.common.loading }}
                 </code>
             </div>
             <button class="btn btn-primary btn-save" id="btn-browse-config" onclick="browseAndSaveConfig()" style="box-shadow: 0 4px 15px rgba(0, 240, 255, 0.2); background: linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--accent-purple))); border: none; font-weight: 700; height: 38px; padding: 0 16px; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; margin: 0; white-space: nowrap;">
-                📂 경로 변경
+                {{ t.dashboard.btn_change_path }}
             </button>
         </div>
 
@@ -43,19 +49,19 @@
             <!-- 1. Dependencies Card -->
             <div class="card cyan" id="card-dependencies">
                 <div class="card-title-group">
-                    <span class="card-title">1단계: 실행 라이브러리</span>
+                    <span class="card-title">{{ t.dashboard.step1_title }}</span>
                     <span class="card-icon">📦</span>
                 </div>
                 <div class="card-value" id="dep-badge-container">
-                    <span class="badge warning">검사 중...</span>
+                    <span class="badge warning">{{ t.dashboard.badge_checking }}</span>
                 </div>
-                <div class="card-subtext">파이썬 의존성 패키지 상태</div>
+                <div class="card-subtext">{{ t.dashboard.step1_sub }}</div>
                 <div class="card-list" id="dep-list">
                     <!-- Dynamic dependencies list -->
                 </div>
                 <div class="card-action-container">
                     <button class="btn btn-secondary card-btn" id="btn-init" onclick="runTask('init')">
-                        🔑 로그인 인증 받기
+                        {{ t.dashboard.btn_login }}
                     </button>
                 </div>
             </div>
@@ -63,24 +69,24 @@
             <!-- 2. OAuth Authentication Card -->
             <div class="card purple" id="card-auth">
                 <div class="card-title-group">
-                    <span class="card-title">2단계: 에버노트 로그인</span>
+                    <span class="card-title">{{ t.dashboard.step2_title }}</span>
                     <span class="card-icon">🔑</span>
                 </div>
                 <div class="card-value" id="auth-badge-container">
-                    <span class="badge warning">검사 중...</span>
+                    <span class="badge warning">{{ t.dashboard.badge_checking }}</span>
                 </div>
-                <div class="card-subtext" id="auth-db-path">로컬 인증 정보 (token_bk.db)</div>
+                <div class="card-subtext" id="auth-db-path">{{ t.dashboard.step2_sub }}</div>
                 <div class="card-list" id="auth-list">
                     <!-- Dynamic auth details -->
                 </div>
                 <div class="card-action-container">
                     <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <button class="btn btn-primary card-btn" id="btn-all" onclick="runTask('all')" style="flex: 1.2;">🚀 원클릭 전체백업</button>
-                        <button class="btn btn-success card-btn" id="btn-sync" onclick="runTask('sync')" style="flex: 0.8;">🔄 증분 동기화</button>
+                        <button class="btn btn-primary card-btn" id="btn-all" onclick="runTask('all')" style="flex: 1.2;">{{ t.dashboard.btn_all }}</button>
+                        <button class="btn btn-success card-btn" id="btn-sync" onclick="runTask('sync')" style="flex: 0.8;">{{ t.dashboard.btn_sync }}</button>
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary card-btn" id="btn-export" onclick="runTask('export')" style="flex: 1;">📁 ENEX 파일 추출</button>
-                        <button class="btn btn-secondary card-btn" id="btn-convert" onclick="runTask('convert')" style="flex: 1;">📝 마크다운 변환</button>
+                        <button class="btn btn-secondary card-btn" id="btn-export" onclick="runTask('export')" style="flex: 1;">{{ t.dashboard.btn_export }}</button>
+                        <button class="btn btn-secondary card-btn" id="btn-convert" onclick="runTask('convert')" style="flex: 1;">{{ t.dashboard.btn_convert }}</button>
                     </div>
                 </div>
             </div>
@@ -88,17 +94,17 @@
             <!-- 3. Backup Status Card -->
             <div class="card green" id="card-backup">
                 <div class="card-title-group">
-                    <span class="card-title">3단계: 백업 Notes</span>
+                    <span class="card-title">{{ t.dashboard.step3_title }}</span>
                     <span class="card-icon">🗄️</span>
                 </div>
                 <div class="card-value" id="backup-total-notes">0 Notes</div>
-                <div class="card-subtext" id="backup-db-path">로컬 백업 데이터 (note.db)</div>
+                <div class="card-subtext" id="backup-db-path">{{ t.dashboard.step3_sub }}</div>
                 <div class="card-list" id="backup-list">
                     <!-- Dynamic backup info -->
                 </div>
                 <div class="card-action-container" style="display: flex; gap: 8px;">
-                    <button class="btn btn-secondary card-btn" onclick="openLocalFolder()" style="flex: 1;">📁 로컬 백업 폴더</button>
-                    <button class="btn btn-primary card-btn" id="btn-launch-browser" onclick="launchMDBrowser()" style="flex: 1; box-shadow: 0 4px 12px rgba(0, 240, 255, 0.2); background: linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--accent-purple))); border: none; font-weight: 600;">💻 MD브라우저실행</button>
+                    <button class="btn btn-secondary card-btn" onclick="openLocalFolder()" style="flex: 1;">{{ t.dashboard.btn_open_folder }}</button>
+                    <button class="btn btn-primary card-btn" id="btn-launch-browser" onclick="launchMDBrowser()" style="flex: 1; box-shadow: 0 4px 12px rgba(0, 240, 255, 0.2); background: linear-gradient(135deg, hsl(var(--accent-cyan)), hsl(var(--accent-purple))); border: none; font-weight: 600;">{{ t.dashboard.btn_launch_browser }}</button>
                 </div>
             </div>
         </div>
@@ -113,11 +119,11 @@
                 </div>
                 <div class="terminal-title">
                     <span id="terminal-loader" class="spinner" style="display: none; margin-right: 8px;"></span>
-                    <span>bash - live_backup_stream.sh</span>
+                    <span>{{ t.dashboard.terminal_title }}</span>
                 </div>
             </div>
             <div class="terminal-body" id="terminal-log">
-                <div class="log-line command">[*] 대시보드가 준비되었습니다. 진단 정보를 불러옵니다...</div>
+                <div class="log-line command">{{ t.dashboard.terminal_ready }}</div>
             </div>
         </div>
     </div>
@@ -127,6 +133,13 @@
 
     <!-- JS Logic -->
     <script>
+        const t = {{ t | tojson | safe }};
+        
+        function setLang(selectedLang) {
+            document.cookie = "lang=" + selectedLang + "; path=/; max-age=31536000";
+            location.reload();
+        }
+
         let eventSource = null;
         let currentRunningAction = null;
         const allButtons = ['btn-all', 'btn-init', 'btn-sync', 'btn-export', 'btn-convert'];
@@ -149,14 +162,14 @@
                 .then(data => {
                     updateBackupDirDisplay(data.base_backup_dir);
                 })
-                .catch(() => showToast("백업 폴더 설정을 불러오지 못했습니다.", "danger"));
+                .catch(() => showToast(t.dashboard.toast_config_err, "danger"));
         }
 
         // Function to trigger native folder picker and then save it
         function browseAndSaveConfig() {
             const btn = document.getElementById('btn-browse-config');
             btn.disabled = true;
-            btn.innerHTML = `⏳ 폴더 선택 중...`;
+            btn.innerHTML = `⏳ ${t.common.loading}`;
             
             fetch('/api/browse_folder', { method: 'POST' })
                 .then(res => res.json())
@@ -167,10 +180,10 @@
                         showToast(data.error, "warning");
                     }
                 })
-                .catch(() => showToast("폴더 선택창을 여는 도중 에러가 발생했습니다.", "danger"))
+                .catch(() => showToast(t.dashboard.toast_folder_pick_err, "danger"))
                 .finally(() => {
                     btn.disabled = false;
-                    btn.innerHTML = `📂 경로 변경`;
+                    btn.innerHTML = t.dashboard.btn_change_path;
                 });
         }
 
@@ -192,7 +205,7 @@
                     showToast(data.error, "danger");
                 }
             })
-            .catch(() => showToast("설정 저장 중 오류가 발생했습니다.", "danger"));
+            .catch(() => showToast(t.dashboard.toast_save_err, "danger"));
         }
 
         // Function to fetch status cards dynamically
@@ -212,7 +225,7 @@
                     }
                 })
                 .catch(err => {
-                    showToast("대시보드 진단 정보를 갱신하지 못했습니다.", "danger");
+                    showToast(t.dashboard.toast_load_err, "danger");
                 });
         }
 
@@ -222,15 +235,15 @@
             const list = document.getElementById("dep-list");
             
             if (depData.ok) {
-                container.innerHTML = `<span class="badge success">준비 완료 (All OK)</span>`;
+                container.innerHTML = `<span class="badge success">${t.dashboard.badge_all_ok}</span>`;
             } else {
-                container.innerHTML = `<span class="badge danger">일부 누락 (Missing)</span>`;
+                container.innerHTML = `<span class="badge danger">${t.dashboard.badge_missing}</span>`;
             }
             
             list.innerHTML = "";
             for (const [pkg, installed] of Object.entries(depData.packages)) {
                 const statusIcon = installed ? "🟢" : "🔴";
-                const statusText = installed ? "설치됨" : "누락됨";
+                const statusText = installed ? t.dashboard.pkg_installed : t.dashboard.pkg_missing;
                 list.innerHTML += `
                     <div class="card-list-item">
                         <span>${statusIcon} ${pkg}</span>
@@ -246,21 +259,21 @@
             const list = document.getElementById("auth-list");
             
             if (dbData.token_ok) {
-                container.innerHTML = `<span class="badge success">🔑 인증 토큰 유효</span>`;
+                container.innerHTML = `<span class="badge success">${t.dashboard.badge_token_ok}</span>`;
             } else {
-                container.innerHTML = `<span class="badge danger">🔒 인증 필요 (OAuth)</span>`;
+                container.innerHTML = `<span class="badge danger">${t.dashboard.badge_token_needed}</span>`;
             }
             
             list.innerHTML = `
                 <div class="card-list-item">
-                    <span>파일 생성 상태</span>
-                    <span>${dbData.token_exists ? "🟢 존재함" : "🔴 없음"}</span>
+                    <span>${t.dashboard.lbl_token_status}</span>
+                    <span>${dbData.token_exists ? t.dashboard.status_token_exists : t.dashboard.status_token_missing}</span>
                 </div>
             `;
             if (dbData.token_exists) {
                 list.innerHTML += `
                     <div class="card-list-item">
-                        <span>파일 크기</span>
+                        <span>${t.dashboard.lbl_file_size}</span>
                         <span>${dbData.token_size_mb.toFixed(2)} MB</span>
                     </div>
                 `;
@@ -272,36 +285,36 @@
             const totalNotes = document.getElementById("backup-total-notes");
             const list = document.getElementById("backup-list");
             
-            totalNotes.innerText = `${dbData.notes_count} Notes`;
+            totalNotes.innerText = t.dashboard.lbl_notes_total.replace('{count}', dbData.notes_count);
             
             list.innerHTML = `
                 <div class="card-list-item">
-                    <span>동기화 데이터베이스</span>
-                    <span>${dbData.note_exists ? "🟢 note.db 준비됨" : "🔴 없음"}</span>
+                    <span>${t.dashboard.lbl_sync_db}</span>
+                    <span>${dbData.note_exists ? t.dashboard.status_db_exists : t.dashboard.status_db_missing}</span>
                 </div>
             `;
             if (dbData.note_exists) {
                 list.innerHTML += `
                     <div class="card-list-item">
-                        <span>노트북 갯수</span>
-                        <span>${dbData.notebooks_count} 개</span>
+                        <span>${t.dashboard.lbl_notebook_count}</span>
+                        <span>${dbData.notebooks_count}${t.common.ok.includes('Confirm') ? '' : ' 개'}</span>
                     </div>
                 `;
                 list.innerHTML += `
                     <div class="card-list-item">
-                        <span>데이터베이스 크기</span>
+                        <span>${t.dashboard.lbl_db_path}</span>
                         <span>${dbData.note_size_mb.toFixed(2)} MB</span>
                     </div>
                 `;
             }
             list.innerHTML += `
                 <div class="card-list-item">
-                    <span>ENEX 내보내기 파일</span>
-                    <span>${expData.count} 개</span>
+                    <span>${t.dashboard.lbl_enex_count}</span>
+                    <span>${expData.count}${t.common.ok.includes('Confirm') ? '' : ' 개'}</span>
                 </div>
                 <div class="card-list-item">
-                    <span>변환된 마크다운 노트</span>
-                    <span>${mdData.notes} 개 (노트북 ${mdData.notebooks}개)</span>
+                    <span>${t.dashboard.lbl_md_count}</span>
+                    <span>${mdData.notes}${t.dashboard.lbl_notes.replace('{count}', mdData.notebooks)}</span>
                 </div>
             `;
         }
@@ -344,7 +357,7 @@
                 }
             })
             .catch(err => {
-                showToast("작업 요청 중 에러가 발생했습니다.", "danger");
+                showToast(t.dashboard.toast_run_err, "danger");
                 enableAllControls();
                 document.getElementById("terminal-loader").style.display = "none";
                 if (action === "init") {
@@ -400,11 +413,11 @@
                 if (line.startsWith("[START]")) lineClass = "start";
                 else if (line.startsWith("[SUCCESS]")) {
                     lineClass = "success";
-                    showToast("백업 작업이 성공적으로 완수되었습니다!", "success");
+                    showToast(t.dashboard.toast_success_bk, "success");
                     if (currentRunningAction !== "init") finishExecution();
                 } else if (line.startsWith("[ERROR]")) {
                     lineClass = "error";
-                    showToast("백업 작업 중 오류가 발생했습니다.", "danger");
+                    showToast(t.dashboard.toast_failed_bk, "danger");
                     finishExecution();
                 } else if (line.startsWith("[*]")) lineClass = "command";
                 else if (line.startsWith("[!]")) lineClass = "warning";
@@ -433,7 +446,7 @@
                 if (btn) btn.disabled = true;
             });
             const activeBtn = document.getElementById(`btn-${activeAction}`);
-            if (activeBtn) activeBtn.innerText = `⏳ 작업 실행 중...`;
+            if (activeBtn) activeBtn.innerText = `⏳ ...`;
         }
 
         function enableAllControls() {
@@ -442,15 +455,15 @@
                 if (btn) btn.disabled = false;
             });
             const btnAll = document.getElementById('btn-all');
-            if (btnAll) btnAll.innerText = `🚀 원클릭 전체백업`;
+            if (btnAll) btnAll.innerText = t.dashboard.btn_all;
             const btnInit = document.getElementById('btn-init');
-            if (btnInit) btnInit.innerText = `🔑 로그인 인증 받기`;
+            if (btnInit) btnInit.innerText = t.dashboard.btn_login;
             const btnSync = document.getElementById('btn-sync');
-            if (btnSync) btnSync.innerText = `🔄 증분 동기화`;
+            if (btnSync) btnSync.innerText = t.dashboard.btn_sync;
             const btnExport = document.getElementById('btn-export');
-            if (btnExport) btnExport.innerText = `📁 ENEX 파일 추출`;
+            if (btnExport) btnExport.innerText = t.dashboard.btn_export;
             const btnConvert = document.getElementById('btn-convert');
-            if (btnConvert) btnConvert.innerText = `📝 마크다운 변환`;
+            if (btnConvert) btnConvert.innerText = t.dashboard.btn_convert;
         }
 
         function showToast(message, type = "success") {
@@ -473,13 +486,13 @@
                     if (data.success) showToast(data.message, "success");
                     else showToast(data.error, "danger");
                 })
-                .catch(() => showToast("폴더 열기 요청 중 오류가 발생했습니다.", "danger"));
+                .catch(() => showToast(t.dashboard.toast_explorer_err, "danger"));
         }
 
         function launchMDBrowser() {
             const btn = document.getElementById("btn-launch-browser");
             btn.disabled = true;
-            btn.innerText = "⏳ 실행 중...";
+            btn.innerText = "⏳ ...";
             fetch('/api/launch_browser', { method: 'POST' })
                 .then(res => res.json())
                 .then(data => {
@@ -489,10 +502,10 @@
                         showToast(data.error || data.message, "danger");
                     }
                 })
-                .catch(() => showToast("MD 브라우저 실행 중 오류가 발생했습니다.", "danger"))
+                .catch(() => showToast(t.dashboard.toast_browser_err, "danger"))
                 .finally(() => {
                     btn.disabled = false;
-                    btn.innerText = "💻 MD브라우저실행";
+                    btn.innerText = t.dashboard.btn_launch_browser;
                 });
         }
     </script>
@@ -500,42 +513,41 @@
     <!-- 🔑 Evernote OAuth Guide Modal Popup -->
     <div id="auth-modal" class="modal" style="display: none;">
         <div class="modal-content">
-            <h3>🔑 에버노트 로그인 및 인증 안내</h3>
-            <p class="modal-intro">새로 열린 검은색 커맨드(CMD) 창과 웹 브라우저를 통해 인증을 완료해 주십시오.</p>
+            <h3>{{ t.dashboard.modal_auth_title }}</h3>
+            <p class="modal-intro">{{ t.dashboard.modal_auth_intro }}</p>
             
             <div class="step-list">
                 <div class="step-item">
                     <span class="step-number">1</span>
-                    <span class="step-text">새 창으로 열린 브라우저 혹은 <strong>CMD 창에 출력된 URL 링크</strong>를 복제하여 새 창 주소창에 넣고 실행합니다.</span>
+                    <span class="step-text">{{ t.dashboard.modal_auth_step1 | safe }}</span>
                 </div>
                 <div class="step-item">
                     <span class="step-number">2</span>
-                    <span class="step-text">이동한 Evernote 'Re-authorize Bulk Backup' 화면에서 <strong>[Re-authorize]</strong> 버튼을 선택합니다.</span>
+                    <span class="step-text">{{ t.dashboard.modal_auth_step2 | safe }}</span>
                 </div>
                 <div class="step-item">
                     <span class="step-number">3</span>
-                    <span class="step-text">브라우저 창에 'Authentication successful!'이 뜨면 성공입니다. <strong>브라우저 창을 닫아줍니다.</strong></span>
+                    <span class="step-text">{{ t.dashboard.modal_auth_step3 | safe }}</span>
                 </div>
                 <div class="step-item">
                     <span class="step-number">4</span>
-                    <span class="step-text">로그인 완료 후 화면 뒤에 있는 <strong>CMD 커맨드 창을 닫아줍니다</strong>. (아무 키나 누르기)</span>
+                    <span class="step-text">{{ t.dashboard.modal_auth_step4 | safe }}</span>
                 </div>
             </div>
 
             <div id="modal-waiting-status" class="waiting-status">
                 <span class="spinner" style="margin-right: 8px;"></span>
-                <span id="waiting-status-text">로컬 인증 파일(token_bk.db)이 생성될 때까지 대기하고 있습니다...</span>
+                <span id="waiting-status-text">{{ t.dashboard.modal_auth_waiting }}</span>
             </div>
 
             <div id="modal-success-status" class="success-status" style="display: none;">
                 <div class="success-icon">🎉</div>
-                <h4>로그인 인증 완료!</h4>
-                <p>로컬 인증 데이터베이스(`token_bk.db`)가 정상적으로 생성되었습니다.</p>
+                <h4>{{ t.dashboard.modal_auth_success }}</h4>
+                <p>{{ t.dashboard.modal_auth_success_sub }}</p>
                 <div class="next-step-guide">
-                    💡 <strong>다음 단계 안내:</strong><br>
-                    인증이 완료되었습니다! 이제 대시보드로 돌아가 <strong>[🚀 원클릭 전체백업]</strong> 또는 <strong>[🔄 증분 동기화]</strong> 버튼을 선택하여 에버노트 메모 다운로드와 마크다운 변환을 진행하세요.
+                    {{ t.dashboard.modal_auth_next | safe }}
                 </div>
-                <button class="btn btn-primary" id="btn-modal-close" onclick="closeAuthModal()">확인 (OK)</button>
+                <button class="btn btn-primary" id="btn-modal-close" onclick="closeAuthModal()">{{ t.common.ok }}</button>
             </div>
         </div>
     </div>

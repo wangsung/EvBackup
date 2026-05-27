@@ -132,12 +132,12 @@ def export_enex():
 def check_and_sanitize_notebooks():
     """Scan Evernote database notebooks or exported ENEX files, warning the user if invalid characters or quotes exist."""
     print("==================================================================")
-    print("[*] [백업 파일 안전성 확인] 노트북 이름 및 특수 문자 포함 검사 중...")
+    print("[*] [Backup Integrity Check] Scanning notebook names and filenames for special characters...")
     
     # Check if BASE_BACKUP_DIR contains quotes
     if "'" in str(BASE_BACKUP_DIR) or '"' in str(BASE_BACKUP_DIR):
-        print("[!] 경고: 로컬 백업 폴더 경로명에 따옴표(' 또는 \")가 포함되어 있습니다.")
-        print("    --> 브라우저 로드 오류 방지를 위해, 경로에서 따옴표를 제거하여 자동 교정하시기를 강력 권장합니다.")
+        print("[!] Warning: Local backup directory path contains quotes (' or \").")
+        print("    --> It is highly recommended to strip quotes from the path to prevent browser loading errors.")
         
     has_issues = False
     
@@ -155,8 +155,8 @@ def check_and_sanitize_notebooks():
                     cleaned = re.sub(r'[\\/*?:"<>|]', "_", cleaned)
                     cleaned = cleaned.strip()
                     if cleaned != name:
-                        print(f"[!] 경고: 에버노트 노트북 이름 '{name}'에 따옴표(') 또는 부적합한 특수문자가 포함되어 있습니다.")
-                        print(f"    --> 파일 시스템 오류 및 브라우저 호환성을 위해 '{cleaned}' 디렉토리명으로 자동 교정되어 백업 및 변환됩니다.")
+                        print(f"[!] Warning: Evernote notebook name '{name}' contains quotes (') or Windows invalid characters.")
+                        print(f"    --> Saved as '{cleaned}' instead to prevent filesystem errors and browser template string conflicts.")
                         has_issues = True
             conn.close()
         except Exception as e:
@@ -170,14 +170,14 @@ def check_and_sanitize_notebooks():
             cleaned = re.sub(r'[\\/*?:"<>|]', "_", cleaned)
             cleaned = cleaned.strip()
             if cleaned != name:
-                print(f"[!] 경고: ENEX 파일 이름 '{name}'에 따옴표(') 또는 부적합한 특수문자가 포함되어 있습니다.")
-                print(f"    --> 마크다운 변환 시 '{cleaned}' 디렉토리명으로 자동 교정되어 저장됩니다.")
+                print(f"[!] Warning: ENEX filename '{name}' contains quotes (') or Windows invalid characters.")
+                print(f"    --> Converted notes will be saved under the '{cleaned}' directory instead.")
                 has_issues = True
                 
     if has_issues:
-        print("[*] 노트북/폴더 이름 안전성 검증 및 자동 교정 안내가 완료되었습니다.")
+        print("[*] Notebook name security checks and auto-correction guidance completed.")
     else:
-        print("[+] 검사 완료: 파일 이름 안전성에 이상이 없으며 백업 폴더와 완벽히 매칭됩니다.")
+        print("[+] Integrity check completed: No filename safety issues detected.")
     print("==================================================================")
 
 def clean_filename(filename):
@@ -475,70 +475,70 @@ def check_markdown():
     return len(notebooks), total_md
 
 def print_status_report():
-    """Analyze the execution environment and print a status report in user-friendly Korean."""
+    """Analyze the execution environment and print a status report in standard English."""
     print("==================================================================")
-    print("           [에버노트 로컬 백업 도구] 실행 환경 분석 및 가이드")
+    print("           [Evernote Backup Tool] Environment Status Analysis")
     print("==================================================================")
     
     # 1. Dependencies Check (Step 1)
     deps, deps_ok = check_dependencies()
-    print("[1] 1단계: 파이썬 필수 라이브러리 설치 여부")
+    print("[1] Step 1: Python Libraries Dependency Verification")
     for dep, status in deps.items():
-        status_str = "설치됨 (Installed)" if status else "미설치 (MISSING)"
+        status_str = "Installed" if status else "MISSING"
         print(f"    - {dep:<25} : [{status_str}]")
     
     if deps_ok:
-        step1_action = "[실행 불필요] 백업에 필요한 필수 파이썬 라이브러리가 이미 완벽하게 설치되어 있습니다."
+        step1_action = "[All OK] Required libraries are fully installed."
     else:
-        step1_action = "[실행 권장] 라이브러리가 일부 누락되었습니다. [1]번 메뉴를 실행하여 라이브러리를 먼저 설치하십시오."
-    print(f"    --> 진단 및 추천 가이드 : {step1_action}")
+        step1_action = "[Required Action] Missing dependencies found. Run library installer first."
+    print(f"    --> Diagnostic Recommendation : {step1_action}")
     print()
     
     # 2. Database & OAuth Security Token Check (Step 2)
     db_status = check_database()
-    print("[2] 2단계: 에버노트 API 보안 토큰 및 로그인 인증 상태")
+    print("[2] Step 2: Evernote API Security Token & Local Authentication Status")
     step2_needed = not db_status["token_ok"]
     if db_status["token_exists"]:
         if "error" in db_status["token_tables"]:
-            print(f"    - 토큰 DB 상태      : 오류 발생 ({db_status['token_tables']['error']})")
+            print(f"    - Token DB Status   : Error occurred ({db_status['token_tables']['error']})")
         elif db_status["token_ok"]:
-            print(f"    - 토큰 DB 상태      : 인증 보안 토큰 유효 (token_bk.db)")
-            print(f"    - 토큰 DB 파일 크기 : {db_status['token_size_mb']:.2f} MB")
+            print(f"    - Token DB Status   : Valid local authentication token found (token_bk.db)")
+            print(f"    - Token DB File Size: {db_status['token_size_mb']:.2f} MB")
         else:
-            print("    - 토큰 DB 상태      : 파일은 존재하나 토큰 정보가 없습니다.")
+            print("    - Token DB Status   : Database exists but token record is missing.")
     else:
-        print("    - 토큰 DB 상태      : 로컬 인증 토큰 DB(token_bk.db)가 없습니다.")
+        print("    - Token DB Status   : Local authentication database (token_bk.db) is missing.")
         
     if not step2_needed:
-        step2_action = "[실행 불필요] 이미 에버노트가 발행한 로그인 보안 토큰이 token_bk.db에 안전하게 저장되어 있습니다.\n                              (토큰 만료 전까지는 [2]번 로그인을 다시 하실 필요가 없습니다.)"
+        step2_action = "[All OK] Evernote secure login token is safely stored locally in token_bk.db."
     else:
-        step2_action = "[실행 필수] 로컬 로그인 보안 토큰이 없습니다.\n                              Evernote가 발행한 보안 토큰이 필요하므로, [2]번 메뉴를 실행해 브라우저 로그인을 완료해 주십시오."
-    print(f"    --> 진단 및 추천 가이드 : {step2_action}")
+        step2_action = "[Required Action] No security token exists. Please perform Step 2 OAuth login authentication."
+    print(f"    --> Diagnostic Recommendation : {step2_action}")
     print()
     
     # 3. Data Sync & Markdown Conversion Check (Step 3)
     enex_count, _ = check_exports()
     nb_count, md_count = check_markdown()
     
-    print("[3] 3단계: 로컬 데이터 동기화 및 마크다운 파일 변환 상태")
+    print("[3] Step 3: Local Database Sync & Markdown Conversion Status")
     if db_status["note_exists"]:
-        print(f"    - 로컬 DB 노트 수   : {db_status['notes_count']}개 노트 (노트북 {db_status['notebooks_count']}개 - note.db)")
-        print(f"    - 로컬 DB 파일 크기 : {db_status['note_size_mb']:.2f} MB")
+        print(f"    - Local Database Notes: {db_status['notes_count']} notes ({db_status['notebooks_count']} notebooks inside note.db)")
+        print(f"    - Local DB File Size  : {db_status['note_size_mb']:.2f} MB")
     else:
-        print("    - 로컬 DB 노트 수   : 0개 (다운로드 진행 안 됨)")
+        print("    - Local Database Notes: 0 notes found (Database note.db missing/empty)")
         
-    print(f"    - ENEX 내보내기 파일 : {enex_count}개 노트북 내보내기 완료")
-    print(f"    - 마크다운 변환 파일 : {md_count}개 노트 변환 완료 (노트북 {nb_count}개)")
+    print(f"    - Exported ENEX Files : {enex_count} notebooks exported successfully")
+    print(f"    - Converted Markdown  : {md_count} notes converted ({nb_count} notebooks)")
     
     if step2_needed:
-        step3_action = "[실행 일시정지] 2단계 에버노트 보안 토큰 발급([2]번 메뉴 실행)이 완료되어야 백업을 진행할 수 있습니다."
+        step3_action = "[Blocked] Evernote login (Step 2) must be authorized before download/sync can begin."
     elif not db_status["note_exists"] or db_status["notes_count"] == 0:
-        step3_action = "[실행 필수] 보안 토큰은 유효하나 note.db에 다운로드된 노트 데이터가 전혀 없습니다.\n                              [3]번 메뉴(전체 백업) 또는 [4]번 메뉴(동기화)를 즉시 실행하여 최초 전체 다운로드를 받으십시오."
+        step3_action = "[Required Action] Security token is valid but local database note.db is empty.\n                              Execute One-Click Full Backup or Sync to perform initial download."
     elif enex_count == 0 or md_count == 0:
-        step3_action = "[실행 권장] 노트를 note.db로는 내려받았으나, 뷰어에서 읽을 수 있는 마크다운 파일로 변환하지 않았습니다.\n                              [3]번 메뉴(전체 백업) 또는 [6]번 메뉴(마크다운 변환)를 실행해 주십시오."
+        step3_action = "[Recommended Action] Notes are downloaded locally, but reader files (.md) have not been compiled.\n                              Run One-Click Full Backup or Convert menu."
     else:
-        step3_action = "[실행 선택] 현재 모든 백업과 마크다운 변환이 정상 완료된 상태입니다.\n                              에버노트 클라우드의 최신 변경사항(추가/수정/삭제)만 반영하려면 [3]번 메뉴를 통해 증분 백업을 수행하십시오."
-    print(f"    --> 진단 및 추천 가이드 : {step3_action}")
+        step3_action = "[All OK] All notes are fully backed up and converted to Markdown.\n                              Run Sync to incrementally retrieve the latest remote edits."
+    print(f"    --> Diagnostic Recommendation : {step3_action}")
     print("==================================================================")
 
 def main():

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="{{ current_lang }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evernote Archive Navigator</title>
+    <title>{{ t.browser.title }}</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -27,25 +27,31 @@
     <!-- [1단] Left Sidebar -->
     <div class="sidebar">
         <div class="logo-section">
-            <div class="logo-title">
-                <span class="logo-icon">🐘</span> Evernote Archive
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div class="logo-title" style="font-size: 1.1rem; font-weight: 700; color: var(--text-title); display: flex; align-items: center; gap: 8px;">
+                    <span class="logo-icon">🐘</span> {{ t.browser.sidebar_logo }}
+                </div>
+                <div class="lang-selector" style="display: flex; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 2px;">
+                    <button onclick="setLang('ko')" style="background: {{ 'rgba(255, 255, 255, 0.15)' if current_lang == 'ko' else 'none' }}; border: none; color: {{ 'white' if current_lang == 'ko' else 'rgba(255,255,255,0.6)' }}; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; transition: all 0.2s;">KO</button>
+                    <button onclick="setLang('en')" style="background: {{ 'rgba(255, 255, 255, 0.15)' if current_lang == 'en' else 'none' }}; border: none; color: {{ 'white' if current_lang == 'en' else 'rgba(255,255,255,0.6)' }}; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; transition: all 0.2s;">EN</button>
+                </div>
             </div>
             <a href="/browser/cleaner" style="display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 0.85rem; color: var(--accent-danger); text-decoration: none; padding: 8px 10px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 6px; font-weight: 600; width: 100%; justify-content: center; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.05); transition: all 0.2s ease;" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.35)';" onmouseout="this.style.background='rgba(239, 68, 68, 0.08)'; this.style.borderColor='rgba(239, 68, 68, 0.2)';">
-                <span>🧹</span> 중복 파일 정리기
+                <span>🧹</span> {{ t.browser.btn_cleaner }}
             </a>
         </div>
         
         <div class="scrollable-content">
-            <div class="section-title">Notebooks</div>
+            <div class="section-title">{{ t.browser.section_notebooks }}</div>
             <div id="notebooks-list">
                 <!-- Loaded dynamically -->
                 <div class="nav-item active" onclick="loadAllNotes()">
-                    <div class="nav-item-left">📂 <span>All Notes</span></div>
+                    <div class="nav-item-left">📂 <span>{{ t.browser.all_notes }}</span></div>
                     <span class="nav-count" id="total-notes-count">0</span>
                 </div>
             </div>
             
-            <div class="section-title">Tags</div>
+            <div class="section-title">{{ t.browser.section_tags }}</div>
             <div id="tags-list" class="tag-cloud">
                 <!-- Loaded dynamically -->
             </div>
@@ -57,7 +63,7 @@
         <div class="list-header">
             <div class="search-container">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" class="search-input" placeholder="Search archive..." oninput="handleSearch(this.value)">
+                <input type="text" id="search-input" class="search-input" placeholder="{{ t.browser.search_placeholder }}" oninput="handleSearch(this.value)">
             </div>
         </div>
         
@@ -65,7 +71,7 @@
             <!-- Loaded dynamically -->
             <div class="viewer-empty">
                 <div class="viewer-empty-icon">📓</div>
-                <p>Loading your archive...</p>
+                <p>{{ t.browser.loading_archive }}</p>
             </div>
         </div>
     </div>
@@ -74,8 +80,8 @@
     <div class="viewer-panel" id="viewer-panel">
         <div class="viewer-empty" id="viewer-empty-state">
             <div class="viewer-empty-icon">📖</div>
-            <h2>Evernote Archive Reader</h2>
-            <p style="margin-top: 8px; font-size: 0.9rem;">Select a notebook and pick a note to start reading.</p>
+            <h2>{{ t.browser.reader_title }}</h2>
+            <p style="margin-top: 8px; font-size: 0.9rem;">{{ t.browser.reader_sub }}</p>
         </div>
         
         <div id="viewer-content-state" style="display: none; height: 100%; flex-direction: column;">
@@ -83,15 +89,15 @@
                 <div class="viewer-title" id="note-view-title">Note Title</div>
                 <div class="viewer-meta-grid">
                     <div class="meta-field">
-                        <span class="meta-label">Notebook:</span>
+                        <span class="meta-label">{{ t.browser.lbl_notebook }}:</span>
                         <span class="meta-value" id="note-view-notebook">My Notebook</span>
                     </div>
                     <div class="meta-field">
-                        <span class="meta-label">Created:</span>
+                        <span class="meta-label">{{ t.browser.lbl_created }}:</span>
                         <span class="meta-value" id="note-view-created">2026-05-22</span>
                     </div>
                     <div class="meta-field" id="note-view-updated-container">
-                        <span class="meta-label">Updated:</span>
+                        <span class="meta-label">{{ t.browser.lbl_updated }}:</span>
                         <span class="meta-value" id="note-view-updated">2026-05-22</span>
                     </div>
                 </div>
@@ -102,13 +108,13 @@
                     <div style="display: flex; gap: 8px; align-items: center;">
                         <!-- View Options Segmented Control -->
                         <div class="view-options-group" style="display: flex; background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 2px;">
-                            <button class="view-opt-btn active" id="view-opt-rendered" onclick="setViewMode('rendered')" onmouseover="if(!this.classList.contains('active')){this.style.color='var(--text-title)'; this.style.background='rgba(255,255,255,0.03)'}" onmouseout="if(!this.classList.contains('active')){this.style.color='var(--text-muted)'; this.style.background='transparent'}" style="background: rgba(59, 130, 246, 0.15); border: none; color: var(--text-title); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.2s ease; font-family: inherit;">Preview</button>
-                            <button class="view-opt-btn" id="view-opt-source" onclick="setViewMode('source')" onmouseover="if(!this.classList.contains('active')){this.style.color='var(--text-title)'; this.style.background='rgba(255,255,255,0.03)'}" onmouseout="if(!this.classList.contains('active')){this.style.color='var(--text-muted)'; this.style.background='transparent'}" style="background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 500; transition: all 0.2s ease; margin-left: 2px; font-family: inherit;">MD Source</button>
-                            <button class="view-opt-btn" id="view-opt-html" onclick="setViewMode('html')" onmouseover="if(!this.classList.contains('active')){this.style.color='var(--text-title)'; this.style.background='rgba(255,255,255,0.03)'}" onmouseout="if(!this.classList.contains('active')){this.style.color='var(--text-muted)'; this.style.background='transparent'}" style="background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 500; transition: all 0.2s ease; margin-left: 2px; font-family: inherit;">HTML</button>
+                            <button class="view-opt-btn active" id="view-opt-rendered" onclick="setViewMode('rendered')" onmouseover="if(!this.classList.contains('active')){this.style.color='var(--text-title)'; this.style.background='rgba(255,255,255,0.03)'}" onmouseout="if(!this.classList.contains('active')){this.style.color='var(--text-muted)'; this.style.background='transparent'}" style="background: rgba(59, 130, 246, 0.15); border: none; color: var(--text-title); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.2s ease; font-family: inherit;">{{ t.browser.btn_preview }}</button>
+                            <button class="view-opt-btn" id="view-opt-source" onclick="setViewMode('source')" onmouseover="if(!this.classList.contains('active')){this.style.color='var(--text-title)'; this.style.background='rgba(255,255,255,0.03)'}" onmouseout="if(!this.classList.contains('active')){this.style.color='var(--text-muted)'; this.style.background='transparent'}" style="background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 500; transition: all 0.2s ease; margin-left: 2px; font-family: inherit;">{{ t.browser.btn_md_source }}</button>
+                            <button class="view-opt-btn" id="view-opt-html" onclick="setViewMode('html')" onmouseover="if(!this.classList.contains('active')){this.style.color='var(--text-title)'; this.style.background='rgba(255,255,255,0.03)'}" onmouseout="if(!this.classList.contains('active')){this.style.color='var(--text-muted)'; this.style.background='transparent'}" style="background: transparent; border: none; color: var(--text-muted); padding: 4px 12px; border-radius: 6px; font-size: 0.75rem; cursor: pointer; font-weight: 500; transition: all 0.2s ease; margin-left: 2px; font-family: inherit;">{{ t.browser.btn_html_source }}</button>
                         </div>
                         <!-- Individual Note Delete Button -->
                         <button class="btn-delete-note" onclick="deleteCurrentNote()" onmouseover="this.style.background='rgba(239, 68, 68, 0.15)'; this.style.borderColor='rgba(239, 68, 68, 0.4)'; this.style.color='white'" onmouseout="this.style.background='rgba(239, 68, 68, 0.05)'; this.style.borderColor='rgba(239, 68, 68, 0.2)'; this.style.color='var(--accent-danger)'" style="background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--accent-danger); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; font-weight: 600; transition: all 0.2s ease; display: flex; align-items: center; gap: 4px; font-family: inherit;">
-                            <span>🗑️</span> Delete
+                            <span>🗑️</span> {{ t.browser.btn_delete }}
                         </button>
                     </div>
                 </div>
@@ -123,6 +129,13 @@
     </div>
 
     <script>
+        const t = {{ t | tojson | safe }};
+        
+        function setLang(selectedLang) {
+            document.cookie = "lang=" + selectedLang + "; path=/; max-age=31536000";
+            location.reload();
+        }
+
         // Global State Variables
         let allNotesCache = [];
         let activeNotebook = null;
@@ -150,7 +163,7 @@
                 // Keep the "All Notes" item
                 let html = `
                     <div class="nav-item ${!activeNotebook && !activeTag ? 'active' : ''}" onclick="selectGlobalView()">
-                        <div class="nav-item-left">📂 <span>All Notes</span></div>
+                        <div class="nav-item-left">📂 <span>${t.browser.all_notes}</span></div>
                         <span class="nav-count" id="total-notes-count">0</span>
                     </div>
                 `;
@@ -189,7 +202,7 @@
                     `;
                 });
                 
-                container.innerHTML = html || `<div style="font-size:0.8rem; color:var(--text-muted);">No tags found</div>`;
+                container.innerHTML = html || `<div style="font-size:0.8rem; color:var(--text-muted);">${t.browser.no_tags}</div>`;
             } catch (e) {
                 console.error("Failed to load tags:", e);
             }
@@ -296,7 +309,7 @@
                 container.innerHTML = `
                     <div class="viewer-empty">
                         <div class="viewer-empty-icon">📭</div>
-                        <p>No notes found in this filter.</p>
+                        <p>${t.browser.no_notes_found}</p>
                     </div>
                 `;
                 return;
@@ -423,7 +436,7 @@
                 document.querySelector(".viewer-body").scrollTop = 0;
             } catch (e) {
                 console.error("Failed to load note content:", e);
-                alert("노트 본문을 불러오는 중 오류가 발생했습니다.");
+                alert(t.browser.alert_delete_err);
             }
         }
 
@@ -461,7 +474,7 @@
         async function deleteCurrentNote() {
             if (!currentNotebook || !currentFilename) return;
 
-            const confirmMsg = `정말로 이 노트를 영구적으로 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다:\n[${currentNotebook}] ${currentFilename}`;
+            const confirmMsg = `${t.browser.alert_delete_confirm}[${currentNotebook}] ${currentFilename}`;
             if (!confirm(confirmMsg)) return;
 
             try {
@@ -497,11 +510,11 @@
                         await loadAllNotes();
                     }
                 } else {
-                    alert("삭제 오류 발생: " + (result.error || JSON.stringify(result)));
+                    alert(t.browser.alert_delete_fail + (result.error || JSON.stringify(result)));
                 }
             } catch (e) {
                 console.error("Failed to delete note:", e);
-                alert("서버 연결 실패로 노트를 삭제할 수 없습니다.");
+                alert(t.browser.alert_delete_server_err);
             }
         }
 
@@ -521,7 +534,7 @@
             document.getElementById("notes-cards-container").innerHTML = `
                 <div class="viewer-empty">
                     <div class="viewer-empty-icon">⏳</div>
-                    <p>Loading notes...</p>
+                    <p>${t.browser.loading_notes}</p>
                 </div>
             `;
         }
@@ -530,7 +543,7 @@
             document.getElementById("notes-cards-container").innerHTML = `
                 <div class="viewer-empty">
                     <div class="viewer-empty-icon">⚠️</div>
-                    <p>Failed to load notes.</p>
+                    <p>${t.browser.failed_load_notes}</p>
                 </div>
             `;
         }
@@ -559,7 +572,7 @@
         }
     </script>
     <div id="toast-notif" class="toast">
-        🗑️ 노트를 성공적으로 삭제했습니다!
+        {{ t.browser.toast_delete_success }}
     </div>
 </body>
 </html>
