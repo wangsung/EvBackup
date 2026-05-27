@@ -69,6 +69,13 @@ EvBackup/
 ├── manager_server.py     # 대시보드 API 및 Flask 웹 서버 실행 파일
 ├── requirements.txt      # 의존성 패키지 목록
 ├── run_manager.bat       # 대시보드 실행 배치 스크립트
+├── mdbrowser/            # 내장형 마크다운 뷰어 패키지 (MDBrowser)
+│   ├── routes.py         # 뷰어 블루프린트 및 REST API 라우트
+│   ├── static/
+│   │   └── style.css     # 뷰어 전용 CSS 스타일 시트
+│   └── templates/
+│       ├── browser.html  # 뷰어 리더기 메인 HTML
+│       └── cleaner.html  # 중복 파일 정리기 HTML
 ├── templates/
 │   └── index.html        # 대시보드 HTML 템플릿
 ├── static/
