@@ -6,19 +6,6 @@ Una plataforma web premium para la gestión y control de copias de seguridad de 
 
 ---
 
-## 🏗️ Esquema del Sistema
-
-```mermaid
-graph TD
-    A["Evernote Cloud"] -- "1. Login y Autenticación OAuth" --> B["token_bk.db"]
-    A -- "2. Sincronización de Notas" --> C["note.db"]
-    C -- "3. Extracción de archivos ENEX" --> D["*.enex"]
-    D -- "4. Conversión a Markdown" --> E["*.md & _resources (Adjuntos)"]
-    E -- "5. Abrir Navegador de Copias" --> F["MD Browser (Puerto 5001/browser/)"]
-```
-
----
-
 ## ⚡ Inicio Rápido (Quick Start)
 
 Pasos para clonar el repositorio, instalar las dependencias necesarias y arrancar el servidor web local. Los usuarios de Windows pueden simplemente ejecutar el script `run_manager.bat`.
@@ -48,6 +35,19 @@ Una vez conectado al panel de control de la aplicación, realice el proceso de r
 3. **Autenticación en Evernote**: Haga clic en `🔑 Iniciar Sesión en Evernote`. Siga las instrucciones del terminal negro (CMD) y del navegador web para validar el acceso (se creará el archivo `token_bk.db` al finalizar).
 4. **Respaldar Todo**: Haga clic en `🚀 Copia de Seguridad Completa en Un Clic` para realizar en secuencia la sincronización, extracción de ENEX y compilación a Markdown.
 5. **Ver Resultados**: Haga clic en `📁 Abrir Carpeta de Copias` para explorar sus notas Markdown locales recién creadas.
+
+---
+
+## 🏗️ Esquema del Sistema
+
+```mermaid
+graph TD
+    A["Evernote Cloud"] -- "1. Login y Autenticación OAuth" --> B["token_bk.db"]
+    A -- "2. Sincronización de Notas" --> C["note.db"]
+    C -- "3. Extracción de archivos ENEX" --> D["*.enex"]
+    D -- "4. Conversión a Markdown" --> E["*.md & _resources (Adjuntos)"]
+    E -- "5. Abrir Navegador de Copias" --> F["MD Browser (Puerto 5001/browser/)"]
+```
 
 ---
 

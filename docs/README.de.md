@@ -6,19 +6,6 @@ Ein Premium-Web-UI-basiertes Backup-Verwaltungstool zur Synchronisierung von Eve
 
 ---
 
-## 🏗️ Systemarchitektur
-
-```mermaid
-graph TD
-    A["Evernote Cloud"] -- "1. OAuth-Anmeldung & Autorisierung" --> B["token_bk.db"]
-    A -- "2. Notizen-Synchronisierung" --> C["note.db"]
-    C -- "3. ENEX-Dateien exportieren" --> D["*.enex"]
-    D -- "4. Markdown-Konvertierung" --> E["*.md & _resources (Anhänge)"]
-    E -- "5. Notizen-Reader starten" --> F["MD Browser (Port 5001/browser/)"]
-```
-
----
-
 ## ⚡ Schnellstart (Quick Start)
 
 Befolgen Sie diese Schritte, um das Repository zu klonen, Python-Abhängigkeiten zu installieren und das Dashboard zu starten. Windows-Benutzer können einfach das Batch-Skript `run_manager.bat` ausführen.
@@ -48,6 +35,19 @@ Führen Sie nach dem Herstellen der Verbindung zum Dashboard den Backup-Vorgang 
 3. **Evernote-Autorisierung**: Klicken Sie auf `🔑 Bei Evernote anmelden`. Befolgen Sie die Anweisungen im neu geöffneten CMD-Terminalfenster und im Webbrowser (erstellt nach Erfolg `token_bk.db`).
 4. **Backup ausführen**: Klicken Sie auf `🚀 Ein-Klick-Komplettbackup`, um Notizen-Synchronisierung, ENEX-Extraktion und Markdown-Kompilierung nacheinander auszuführen.
 5. **Ergebnisse anzeigen**: Klicken Sie auf `📁 Backup-Ordner öffnen`, um das konvertierte lokale Verzeichnis im Windows-Explorer zu öffnen.
+
+---
+
+## 🏗️ Systemarchitektur
+
+```mermaid
+graph TD
+    A["Evernote Cloud"] -- "1. OAuth-Anmeldung & Autorisierung" --> B["token_bk.db"]
+    A -- "2. Notizen-Synchronisierung" --> C["note.db"]
+    C -- "3. ENEX-Dateien exportieren" --> D["*.enex"]
+    D -- "4. Markdown-Konvertierung" --> E["*.md & _resources (Anhänge)"]
+    E -- "5. Notizen-Reader starten" --> F["MD Browser (Port 5001/browser/)"]
+```
 
 ---
 

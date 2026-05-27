@@ -6,19 +6,6 @@ A premium Web-UI based backup management dashboard designed to synchronize Evern
 
 ---
 
-## 🏗️ System Architecture
-
-```mermaid
-graph TD
-    A["Evernote Cloud"] -- "1. OAuth Login & Auth" --> B["token_bk.db"]
-    A -- "2. Note Synchronization" --> C["note.db"]
-    C -- "3. ENEX Extraction" --> D["*.enex"]
-    D -- "4. Markdown Conversion" --> E["*.md & _resources (Attachments)"]
-    E -- "5. Launch Reader Viewer" --> F["MD Browser (Port 5001/browser/)"]
-```
-
----
-
 ## ⚡ Quick Start
 
 Follow these steps to clone the repository, install Python dependencies, and boot the web dashboard. For Windows users, you can simply run the `run_manager.bat` batch script.
@@ -48,6 +35,19 @@ Once connected to the dashboard web interface, perform the backup process in the
 3. **Evernote Authentication**: Click `🔑 Start Evernote Login`. Follow instructions in the newly opened terminal (CMD) console and web browser to authorize access (creates `token_bk.db` upon success).
 4. **Run Full Backup**: Click `🚀 One-Click Full Backup` to execute note synchronization, ENEX files extraction, and Markdown compilation sequentially.
 5. **View Local Output**: Click `📁 Open Local Backup` to open your system file explorer at the compiled Markdown archive directory.
+
+---
+
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    A["Evernote Cloud"] -- "1. OAuth Login & Auth" --> B["token_bk.db"]
+    A -- "2. Note Synchronization" --> C["note.db"]
+    C -- "3. ENEX Extraction" --> D["*.enex"]
+    D -- "4. Markdown Conversion" --> E["*.md & _resources (Attachments)"]
+    E -- "5. Launch Reader Viewer" --> F["MD Browser (Port 5001/browser/)"]
+```
 
 ---
 
