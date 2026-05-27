@@ -490,8 +490,6 @@
                 .then(data => {
                     if (data.success) {
                         showToast(data.message, "success");
-                    } else if (data.status === "inactive") {
-                        showMDBrowserModal();
                     } else {
                         showToast(data.error || data.message, "danger");
                     }
@@ -501,14 +499,6 @@
                     btn.disabled = false;
                     btn.innerText = "💻 MD브라우저실행";
                 });
-        }
-
-        function showMDBrowserModal() {
-            document.getElementById("mdbrowser-modal").style.display = "flex";
-        }
-
-        function closeMDBrowserModal() {
-            document.getElementById("mdbrowser-modal").style.display = "none";
         }
     </script>
 
@@ -555,35 +545,5 @@
         </div>
     </div>
 
-    <!-- 💻 MDBrowser Server Guide Modal Popup -->
-    <div id="mdbrowser-modal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <h3>💻 MD 브라우저 서버 구동 안내</h3>
-            <p class="modal-intro">Evernote 마크다운 백업 뷰어(MDBrowser) 서버가 구동 중이 아닙니다. 아래의 순서에 따라 서버를 기동해 주시기 바랍니다.</p>
-            
-            <div class="step-list">
-                <div class="step-item">
-                    <span class="step-number">1</span>
-                    <span class="step-text">윈도우 파일 탐색기를 실행하고 <strong><code id="mdbrowser-folder-path">c:\{user}\ever_md\_MDBrower</code></strong> 폴더로 이동합니다.</span>
-                </div>
-                <div class="step-item">
-                    <span class="step-number">2</span>
-                    <span class="step-text">폴더 내의 <strong><code>server.py</code></strong> 파일을 파이썬으로 실행하기 위해 CMD 커맨드 창을 열고 아래의 명령어를 입력해 기동합니다.<br>
-                    <code style="font-family: 'Fira Code', monospace; font-size: 12px; color: hsl(var(--accent-cyan)); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; display: inline-block; margin-top: 4px;">python server.py</code>
-                    </span>
-                </div>
-                <div class="step-item">
-                    <span class="step-number">3</span>
-                    <span class="step-text">만약 윈도우 원클릭 배치 파일이 존재하는 경우, <strong>배치 파일(예: run.bat 또는 server.bat 등)을 마우스 더블클릭</strong>하여 간편하게 구동하실 수도 있습니다.</span>
-                </div>
-                <div class="step-item">
-                    <span class="step-number">4</span>
-                    <span class="step-text">구동 로그 <code>* Running on http://127.0.0.1:5000</code>가 확인되면 서버 작동 성공입니다. 뷰어로 진입하려면 대시보드로 돌아와 다시 **`[💻 MD브라우저실행]`**을 선택해 주십시오.</span>
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id="btn-mdbrowser-modal-close" onclick="closeMDBrowserModal()" style="width: 100%; margin-top: 10px;">확인 (OK)</button>
-        </div>
-    </div>
 </body>
 </html>

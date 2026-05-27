@@ -15,6 +15,10 @@ from backup import check_dependencies, check_database, check_exports, check_mark
 
 app = Flask(__name__)
 
+# Register MDBrowser Blueprint
+from browser_routes import browser_bp
+app.register_blueprint(browser_bp, url_prefix='/browser')
+
 # Global thread-safe process runner
 class ProcessRunner:
     def __init__(self):
@@ -240,26 +244,10 @@ def api_stream():
 
 @app.route('/api/launch_browser', methods=['POST'])
 def api_launch_browser():
-    port = 5000
-    host = '127.0.0.1'
-    url = f"http://{host}:{port}"
-    
-    # Check if MDBrowser port 5000 is already active
-    in_use = False
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        in_use = s.connect_ex((host, port)) == 0
-        
-    if not in_use:
-        return jsonify({
-            "success": False,
-            "status": "inactive",
-            "message": "MD 브라우저 서버(포트 5000)가 현재 구동 중이 아닙니다."
-        })
-            
-    # Open default web browser tab
+    url = "http://127.0.0.1:5001/browser/"
     try:
         webbrowser.open(url)
-        return jsonify({"success": True, "message": "MD 브라우저가 성공적으로 호출되었습니다."})
+        return jsonify({"success": True, "message": "MD 브라우저가 호출되었습니다."})
     except Exception as e:
         return jsonify({"success": False, "error": f"브라우저 실행 실패: {str(e)}"}), 500
 
