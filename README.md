@@ -1,6 +1,6 @@
 # Evernote BackupManager (EvBackup)
 
-🌐 **[English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
+🌐 **[English](README.md) | [한국어](docs/README.ko.md) | [日本語](docs/README.ja.md) | [简体中文](docs/README.zh.md) | [Español](docs/README.es.md) | [Deutsch](docs/README.de.md)**
 
 A premium Web-UI based backup management dashboard designed to synchronize Evernote notes into a local SQLite database and convert them into beautiful local Markdown archives with all original media attachments preserved.
 

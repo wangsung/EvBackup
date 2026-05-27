@@ -1,6 +1,6 @@
 # Evernote BackupManager (EvBackup)
 
-🌐 **[English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
+🌐 **[English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
 
 Evernote（エバーノート）のノートをローカルのSQLiteデータベースに同期し、添付ファイルを含むローカルのマークダウン（Markdown）形式に変換する、ウェブUIベースのバックアップ管理ツールです。
 

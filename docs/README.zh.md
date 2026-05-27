@@ -1,6 +1,6 @@
 # Evernote BackupManager (EvBackup)
 
-🌐 **[English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
+🌐 **[English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
 
 这是一款基于 Web 用户界面的 Evernote（印象笔记）本地备份管理面板。能够将您的云端笔记无缝同步至本地 SQLite 数据库，并将其转换为包含全部媒体附件的标准 Markdown（麦克唐纳）归档文档。
 

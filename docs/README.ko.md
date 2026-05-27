@@ -1,6 +1,6 @@
 # Evernote BackupManager (EvBackup)
 
-🌐 **[English](README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
+🌐 **[English](../README.md) | [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh.md) | [Español](README.es.md) | [Deutsch](README.de.md)**
 
 에버노트(Evernote) 노트를 로컬 SQLite 데이터베이스로 동기화하고, 첨부파일을 포함한 로컬 마크다운(Markdown) 문서로 변환하는 웹 UI 기반 백업 관리 도구입니다.
 
