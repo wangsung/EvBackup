@@ -35,8 +35,9 @@ def load_translations(lang):
 
 @app.context_processor
 def inject_translations():
-    lang = request.cookies.get('lang') or request.accept_languages.best_match(['ko', 'en']) or 'ko'
-    if lang not in ['ko', 'en']:
+    supported_langs = ['ko', 'en', 'ja', 'zh', 'es', 'de']
+    lang = request.cookies.get('lang') or request.accept_languages.best_match(supported_langs) or 'ko'
+    if lang not in supported_langs:
         lang = 'ko'
     return dict(t=load_translations(lang), current_lang=lang)
 
@@ -181,14 +182,16 @@ def api_browse_folder():
     import backup
     
     # Retrieve language from cookies or browser headers
-    lang = request.cookies.get('lang') or request.accept_languages.best_match(['ko', 'en']) or 'ko'
-    if lang not in ['ko', 'en']:
+    supported_langs = ['ko', 'en', 'ja', 'zh', 'es', 'de']
+    lang = request.cookies.get('lang') or request.accept_languages.best_match(supported_langs) or 'ko'
+    if lang not in supported_langs:
         lang = 'ko'
         
-    dialog_title = "Select Backup Storage Folder" if lang == 'en' else "백업 저장소 폴더 선택"
-    cancel_msg = "Directory selection cancelled." if lang == 'en' else "폴더 선택이 취소되었습니다."
-    timeout_msg = "Directory selection timed out." if lang == 'en' else "폴더 선택 대기 시간이 초과되었습니다."
-    error_msg_prefix = "Failed to open folder picker: " if lang == 'en' else "폴더 선택 창 열기 실패: "
+    t = load_translations(lang).get("dashboard", {})
+    dialog_title = t.get("picker_title", "Select Backup Storage Folder")
+    cancel_msg = t.get("picker_cancel", "Directory selection cancelled.")
+    timeout_msg = t.get("picker_timeout", "Directory selection timed out.")
+    error_msg_prefix = t.get("picker_error", "Failed to open folder picker: ")
     
     initial_dir = str(backup.BASE_BACKUP_DIR).replace("\\", "/")
     script = f"""
