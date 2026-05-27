@@ -13,7 +13,9 @@ import json
 CONFIG_PATH = Path(__file__).parent / "config.json"
 
 def load_config():
-    default_dir = "C:/_My2026/_EVERBK"
+    import getpass
+    username = getpass.getuser()
+    default_dir = f"c:/{username}/ever_md"
     if not CONFIG_PATH.exists():
         config = {"base_backup_dir": default_dir}
         try:
@@ -255,8 +257,8 @@ def convert_html_to_md(html_content, resources):
             mime = res_info["mime_type"]
             
             # Relative path to resource from the notebook's folder
-            # Since notebook folder is C:/_My2026/_EVERBK/markdown/<NotebookName>/
-            # and resources are in C:/_My2026/_EVERBK/markdown/_resources/
+            # Since notebook folder is c:/{user}/ever_md/markdown/<NotebookName>/
+            # and resources are in c:/{user}/ever_md/markdown/_resources/
             # relative path is ../_resources/<filename>
             relative_path = f"../_resources/{filename}"
             

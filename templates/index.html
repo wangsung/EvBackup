@@ -137,12 +137,22 @@
             fetchStatus();
         });
 
+        // Function to update dynamic paths in display and modal
+        function updateBackupDirDisplay(path) {
+            document.getElementById('backup-dir-display').innerText = path;
+            const normalizedPath = path.replace(/\//g, '\\');
+            const mdbrowserCode = document.getElementById('mdbrowser-folder-path');
+            if (mdbrowserCode) {
+                mdbrowserCode.innerText = normalizedPath + '\\_MDBrower';
+            }
+        }
+
         // Function to fetch base backup path configuration
         function fetchConfig() {
             fetch('/api/config')
                 .then(res => res.json())
                 .then(data => {
-                    document.getElementById('backup-dir-display').innerText = data.base_backup_dir;
+                    updateBackupDirDisplay(data.base_backup_dir);
                 })
                 .catch(() => showToast("백업 폴더 설정을 불러오지 못했습니다.", "danger"));
         }
@@ -180,7 +190,7 @@
             .then(data => {
                 if (data.success) {
                     showToast(data.message, "success");
-                    document.getElementById('backup-dir-display').innerText = data.base_backup_dir;
+                    updateBackupDirDisplay(data.base_backup_dir);
                     // Re-fetch status cards instantly to show updated database states
                     fetchStatus();
                 } else {
@@ -554,7 +564,7 @@
             <div class="step-list">
                 <div class="step-item">
                     <span class="step-number">1</span>
-                    <span class="step-text">윈도우 파일 탐색기를 실행하고 <strong><code>C:\_My2026\_EVERBK\_MDBrower</code></strong> 폴더로 이동합니다.</span>
+                    <span class="step-text">윈도우 파일 탐색기를 실행하고 <strong><code id="mdbrowser-folder-path">c:\{user}\ever_md\_MDBrower</code></strong> 폴더로 이동합니다.</span>
                 </div>
                 <div class="step-item">
                     <span class="step-number">2</span>
